@@ -1,17 +1,20 @@
 import pyodbc
 
-class Region:
+
+class Regions:
     def __init__(self, region_id, region_description):
-        self.table_name = 'Region'
+        self.table_name = 'Regions'
         self.RegionID = region_id
         self.RegionDescription = region_description
+
 
 class Shippers:
     def __init__(self, shipper_id, company_name, phone):
         self.table_name = 'Shippers'
-        self.shipper_id = shipper_id
-        self.company_name = company_name
-        self.phone = phone
+        self.ShipperID = shipper_id
+        self.CompanyName = company_name
+        self.Phone = phone
+
 
 class Connection:
     def __init__(self, server, database_name, user_name, password):
@@ -27,7 +30,8 @@ class Connection:
                                           'UID='+self.user_name+';'
                                           'PWD='+self.password)
         cursor = docker_northwind.cursor()
-        return(cursor)
+        return cursor
+
 
 class ReadOperation:
     def __init__(self, table, select_string):
@@ -39,6 +43,7 @@ class ReadOperation:
         connector.execute(sql_select)
         for row in connector:
             print(row)
+
 
 class InsertOperation:
     def __init__(self, record):
@@ -60,12 +65,14 @@ class InsertOperation:
             value_string += value+','
         if value_string.endswith(','):
             value_string = value_string[:-1]
-        sql_add = "INSERT INTO " + self.table_name + "(" + column_string + ") VALUES(" + value_string + ")"
+        sql_add = "SET IDENTITY_INSERT " + self.table_name + " ON " \
+                  "INSERT INTO " + self.table_name + "(" + column_string + ") VALUES(" + value_string + ")" \
+                  " SET IDENTITY_INSERT " + self.table_name + " OFF "
         connector.execute(sql_add)
         connector.commit()
 
 
-class DeleteOperation():
+class DeleteOperation:
     def __init__(self, table_name, condition):
         self.table_name = table_name
         self.condition = condition
@@ -76,7 +83,7 @@ class DeleteOperation():
         connector.commit()
 
 
-class UpdateOperation():
+class UpdateOperation:
     def __init__(self, table_name, column_update, condition):
         self.table_name = table_name
         self.column_update = column_update
@@ -93,7 +100,7 @@ class ProgramMain:
         self.connector = ""
 
     def connection(self, server, database_name, user_name, password):
-        connector = Connection(server,database_name,user_name,password).make_connection()
+        connector = Connection(server, database_name, user_name, password).make_connection()
         self.connector = connector
 
     def insert(self, record_object):
@@ -113,11 +120,11 @@ class ProgramMain:
         update_object.do_it(self.connector)
 
 
-# region = Region("'6'","'Outback'")
-# ship = Shippers('12','Big Ships','999')
-# mainprogram = ProgramMain()
-# mainprogram.connection('localhost,1433','Northwind','sa','Passw0rd2018')
-# mainprogram.read("Region","*")
-# mainprogram.update("Region","RegionDescription = 'Far away","RegionID = 4")
-# mainprogram.insert(region)
-# mainprogram.delete("Region","RegionID = 4")
+region_row = Regions("'5'","'Outback'")
+ship_row = Shippers("'4'","'Big Ships'","'999'")
+main_program = ProgramMain()
+main_program.connection('localhost,1433','Northwind','sa','Passw0rd2018')
+# main_program.read("Shippers","*")
+# main_program.update("Region","RegionDescription = 'Far away","RegionID = 4")
+main_program.insert(ship_row)
+# main_program.delete("Shippers","ShipperID = 4")
